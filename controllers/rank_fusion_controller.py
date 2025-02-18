@@ -10,20 +10,20 @@ class RankFusionController:
 
         for rank_list in rankings:
             for position, item in enumerate(rank_list):
-                item_id = item['id']
+                item_text = item['text']
 
                 # RRF formula: 1 / (k + r) where r is the rank position
                 score = 1.0 / (self.k + position)
 
-                if item_id in fusion_scores:
-                    fusion_scores[item_id]['rrf_score'] += score
+                if item_text in fusion_scores:
+                    fusion_scores[item_text]['rrf_score'] += score
                     # Keep track of original scores and metadata
-                    fusion_scores[item_id]['sources'].append({
+                    fusion_scores[item_text]['sources'].append({
                         'score': item.get('score', 0.0),
                         'metadata': {'text': item.get('text', '')}
                     })
                 else:
-                    fusion_scores[item_id] = {
+                    fusion_scores[item_text] = {
                         'rrf_score': score,
                         'sources': [{
                             'score': item.get('score', 0.0),
@@ -34,14 +34,14 @@ class RankFusionController:
         # Create final ranked list
         ranked_results = []
 
-        for item_id, data in fusion_scores.items():
+        for item_text, data in fusion_scores.items():
             combined_metadata = defaultdict(list)
             for source in data['sources']:
                 for key, value in source['metadata'].items():
                     combined_metadata[key].append(value)
             
             ranked_results.append({
-                'id': item_id,
+                'text': item_text,
                 'rrf_score': data['rrf_score'],
                 'original_scores': [source['score'] for source in data['sources']],
                 'metadata': combined_metadata

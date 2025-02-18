@@ -1,3 +1,5 @@
+import os
+import uuid
 import pickle
 import numpy as np
 from pinecone import Pinecone, ServerlessSpec
@@ -11,7 +13,7 @@ class PineconeController:
         if index_name not in self.pc.list_indexes().names():
             self.pc.create_index(
                 name=index_name,
-                dimension=1536,  # Assuming using OpenAI embeddings
+                dimension=768,  # Assuming using Ollama embeddings
                 metric="cosine",
                 spec=ServerlessSpec(
                     cloud="aws",
@@ -24,9 +26,9 @@ class PineconeController:
     def store_embeddings(self, embeddings, chunks, chunk_metadata=None):
         # Prepare vectors for upsert
         vectors_to_upsert = []
-        for i, (embedding, chunk) in enumerate(zip(embeddings, chunks)):
+        for embedding, chunk in zip(embeddings, chunks):
             vector_data = {
-                'id': f'chunk_{i}',
+                'id': str(uuid.uuid4()), # -> to prevent overwriting
                 'values': embedding,
                 'metadata': {
                     'text': chunk,
@@ -34,8 +36,8 @@ class PineconeController:
             }
             
             # Add additional metadata if provided
-            if chunk_metadata and i < len(chunk_metadata):
-                vector_data['metadata'].update(chunk_metadata[i])
+            if chunk_metadata:
+                vector_data['metadata'].update(chunk_metadata.pop(0))
                 
             vectors_to_upsert.append(vector_data)
         
@@ -62,21 +64,41 @@ class PineconeController:
 
 class TFIDFController:
     def __init__(self, index_name):
-        self.tfidf_vectorizer = TfidfVectorizer()
+        self.tfidf_vectorizer = None
         self.index_name = index_name
 
     def create_tfidf_index(self, chunks):
-        # Fit and transform the chunks to create TF-IDF vectors
-        tfidf_vectors = self.tfidf_vectorizer.fit_transform(chunks)
+        if os.path.exists(self.index_name):
+            existing_data = self.load_tfidf_index()
+            self.tfidf_vectorizer = existing_data['vectorizer']
+            tfidf_vectors = self.tfidf_vectorizer.transform(chunks)
+        else:
+            self.tfidf_vectorizer = TfidfVectorizer()
+            tfidf_vectors = self.tfidf_vectorizer.fit_transform(chunks)
+
         return tfidf_vectors
     
     def store_tfidf_index(self, tfidf_vectors, chunks):
+        if os.path.exists(self.index_name):
+            # Load existing data
+            existing_data = self.load_tfidf_index()
+            existing_vectors = existing_data['vectors']
+            existing_chunks = existing_data['chunks']
+
+            # Combine existing and new data
+            combined_vectors = np.vstack([existing_vectors, tfidf_vectors])
+            combined_chunks = existing_chunks + chunks
+
+        else:
+            combined_vectors = tfidf_vectors
+            combined_chunks = chunks
+
         # Save both the vectorizer and the vectors
         with open(self.index_name, 'wb') as f:
             pickle.dump({
                 'vectorizer': self.tfidf_vectorizer,
-                'vectors': tfidf_vectors,
-                'chunks': chunks
+                'vectors': combined_vectors,
+                'chunks': combined_chunks
             }, f)
             
     def load_tfidf_index(self):
