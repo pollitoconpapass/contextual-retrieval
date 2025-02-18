@@ -19,7 +19,7 @@ Here is the chunk we want to situate within the whole document
 </chunk>
 
 Please give a short succinct context to situate this chunk within the overall document for the purposes of improving search retrieval of the chunk.
-Answer only with the succinct context and nothing else.
+Answer only in ENGLISH with the succinct context and nothing else.
 """
 
 LLM_ASSISTANT_PROMPT = """
@@ -37,11 +37,19 @@ class LLMController:
     def __init__(self, model_name="dolphin-mistral"):
         self.model_name = model_name
 
+    def truncate_text(self, text, max_size=12000):
+        if len(text) > max_size:
+            return text[:max_size]
+        
+        return text
+
     def generate_main_text_idea(self, text):
+        truncated_text = self.truncate_text(text)
+
         response = ollama.chat(
             model=self.model_name,
             messages=[
-                {"role": "user", "content": DOCUMENT_CONTEXT_PROMPT.format(doc_content=text)},
+                {"role": "user", "content": DOCUMENT_CONTEXT_PROMPT.format(doc_content=truncated_text)},
             ]
         )
 
