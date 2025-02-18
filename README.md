@@ -60,6 +60,9 @@ Contextual Retrieval is designed to enhance the performance of RAG systems by pr
 
         # === NECESSARY DATA (NO credentials) ===
         PDF_PATH="./data/for/your/ownPDF.pdf"
+        START_PAGE=
+        END_PAGE=
+
         PINECONE_INDEX_NAME="your-own-pinecone-name"
         TFIDF_INDEX_NAME="your_tfidf_index_name.pkl"
 
@@ -133,3 +136,7 @@ Contextual Retrieval is designed to enhance the performance of RAG systems by pr
         - `pinecone_index_name` (str): Pinecone index name
         - `tfidf_index_name` (str): TF-IDF index name including the .pkl
         - `top_k` (int): Number of k to retrieve
+
+
+## 🧪 Usage Example
+![alt text](./public/demo-image.png)
