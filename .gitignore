@@ -1,0 +1,10 @@
+# FOLDERS
+**/__pycache__
+test
+data
+
+
+# FILES
+.env
+.DS_Store
+**.pkl
