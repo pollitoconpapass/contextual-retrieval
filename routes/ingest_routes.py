@@ -25,6 +25,8 @@ async def ingestion(data: dict):
     tfidf_index_name: str
     """
     pdf_path = data.get("pdf_path")
+    start_page = data.get("start_page", 0)
+    end_page = data.get("end_page", None)
     pinecone_index_name = data.get("pinecone_index_name")
     tfidf_index_name = data.get("tfidf_index_name")
 
@@ -38,15 +40,14 @@ async def ingestion(data: dict):
 
 
         # Extracting Text from the PDF doc
-        text_extracted = reading.extract_text_from_pdf()
-        full_text = " ".join(text_extracted)
+        text_extracted = reading.extract_text_from_pdf(start_page=start_page, end_page=end_page)
 
         # Generate chunks
-        original_chunks = reading.generate_chunks(text=full_text)
+        original_chunks = reading.generate_chunks(text=text_extracted)
         print(f"Number of original chunks: {len(original_chunks)}")
 
         # Generate main idea
-        text_main_idea = llm_admin.generate_main_text_idea(text=full_text)
+        text_main_idea = llm_admin.generate_main_text_idea(text=text_extracted)
 
         # Give context to chunks
         contextualized_chunks = []
