@@ -6,7 +6,7 @@ This project is a free implementation of Anthropic's research on [Contextual Ret
 
 ## 🤓 Introduction
 
-Contextual Retrieval is designed to enhance the performance of RAG systems by providing more accurate and contextually relevant retrievals. This project leverages various free technologies and APIs, including Pinecone, Ollama, and Cohere, to achieve this goal.
+Contextual Retrieval is designed to enhance the performance of RAG systems by providing more accurate and contextually relevant retrievals. This project leverages various free technologies and APIs, including Pinecone, and Ollama, to achieve this goal.
 
 > [!WARNING]
 > Pinecone and Cohere have some free limits. Beware of that.
@@ -15,7 +15,6 @@ Contextual Retrieval is designed to enhance the performance of RAG systems by pr
 - Python
 - Ollama
 - Pinecone Account
-- Cohere Account
 
 ## 🔍 Features
 
@@ -25,7 +24,7 @@ Contextual Retrieval is designed to enhance the performance of RAG systems by pr
 - **Pinecone Integration**: Stores and retrieves embeddings using Pinecone.
 - **TF-IDF Indexing**: Creates and queries TF-IDF indices for text chunks.
 - **Rank Fusion**: Combines results from multiple retrieval methods using Reciprocal Rank Fusion.
-- **Reranking**: Reranks retrieved results using Cohere's reranking model.
+- **Reranking**: Reranks retrieved results using Flashrank reranking model.
 - **LLM Assistant**: Provides contextual answers using Dolphin Mistral language model through Ollama.
 
 
@@ -45,7 +44,8 @@ Contextual Retrieval is designed to enhance the performance of RAG systems by pr
 
 3. Install the required dependencies:
     ```sh
-    pip install -r requirements.txt
+    pip3 install -r requirements.txt
+    pip3 install "rerankers[flashrank]"
     ```
 
 4. Set up environment variables:
@@ -68,7 +68,6 @@ Contextual Retrieval is designed to enhance the performance of RAG systems by pr
 
         LLM_MODEL_NAME=
         EMBEDDING_MODEL_NAME=
-        COHERE_MODEL_NAME =
         ```
 
 
