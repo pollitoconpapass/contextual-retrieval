@@ -6,18 +6,16 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 
 from controllers.llm_controller import LLMController
 from controllers.embedding_controller import EmbedingController
-from controllers.cohere_rerank_controller import CohereRerankController
+from controllers.custom_rerank_controller import CustomRerankController
 from controllers.document_processing_controller import PineconeController, TFIDFController
 from controllers.rank_fusion_controller import RankFusionController, format_pinecone_results, format_tfidf_results
 
 load_dotenv(os.path.join(os.path.dirname(__file__), '../.env'))
 
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
-COHERE_API_KEY = os.getenv("COHERE_API_KEY")
 
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL_NAME")
 LLM_MODEL = os.getenv("LLM_MODEL_NAME")
-COHERE_MODEL = os.getenv("COHERE_MODEL_NAME")
 
 router = APIRouter()
 
@@ -56,7 +54,7 @@ async def chat(data: dict):
         ])
 
         # Reranking
-        reranker = CohereRerankController(COHERE_API_KEY, model_name=COHERE_MODEL)
+        reranker = CustomRerankController(model_name='flashrank', language_code='en')
         reranked_results = reranker.rerank(query, fused_results[:top_k])
 
         # Calling the LLM Assistant
